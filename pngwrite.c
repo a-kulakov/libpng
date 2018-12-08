@@ -1025,11 +1025,15 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
 #endif /* ! WRITE_FILTER */
 
 #ifdef PNG_WRITE_FILTER_SUPPORTED
-      switch (filters & (PNG_ALL_FILTERS | 0x07))
+      switch (filters)
       {
-         case 5:
-         case 6:
-         case 7: png_app_error(png_ptr, "Unknown row filter for method 0");
+         default:
+            if ((filters & PNG_ALL_FILTERS) && !(filters & ~PNG_ALL_FILTERS))
+            {
+               /* Filter flags only */
+               png_ptr->do_filter = (png_byte)filters; break;
+            }
+            png_app_error(png_ptr, "Unknown row filter for method 0");
             /* FALLTHROUGH */
          case PNG_FILTER_VALUE_NONE:
             png_ptr->do_filter = PNG_FILTER_NONE; break;
@@ -1045,9 +1049,6 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
 
          case PNG_FILTER_VALUE_PAETH:
             png_ptr->do_filter = PNG_FILTER_PAETH; break;
-
-         default:
-            png_ptr->do_filter = (png_byte)filters; break;
       }
 #endif /* WRITE_FILTER */
 
@@ -1069,6 +1070,9 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
       {
          int num_filters;
          png_alloc_size_t buf_size;
+
+         /* Processing above should provide value with filter flags only */
+         filters = png_ptr->do_filter;
 
          /* Repeat the checks in png_write_start_row; 1 pixel high or wide
           * images cannot benefit from certain filters.  If this isn't done here
