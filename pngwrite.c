@@ -1016,18 +1016,27 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
 #endif
    if (method == PNG_FILTER_TYPE_BASE)
    {
+#ifndef PNG_WRITE_FILTER_SUPPORTED
       switch (filters & (PNG_ALL_FILTERS | 0x07))
       {
+         case PNG_FILTER_VALUE_NONE:
+            png_ptr->do_filter = PNG_FILTER_NONE; break;
+
+         default:
+            png_app_error(png_ptr, "Unknown row filter for method 0");
+      }
+#endif /* ! WRITE_FILTER */
+
 #ifdef PNG_WRITE_FILTER_SUPPORTED
+      switch (filters & (PNG_ALL_FILTERS | 0x07))
+      {
          case 5:
          case 6:
          case 7: png_app_error(png_ptr, "Unknown row filter for method 0");
-#endif /* WRITE_FILTER */
             /* FALLTHROUGH */
          case PNG_FILTER_VALUE_NONE:
             png_ptr->do_filter = PNG_FILTER_NONE; break;
 
-#ifdef PNG_WRITE_FILTER_SUPPORTED
          case PNG_FILTER_VALUE_SUB:
             png_ptr->do_filter = PNG_FILTER_SUB; break;
 
@@ -1042,11 +1051,8 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
 
          default:
             png_ptr->do_filter = (png_byte)filters; break;
-#else
-         default:
-            png_app_error(png_ptr, "Unknown row filter for method 0");
-#endif /* WRITE_FILTER */
       }
+#endif /* WRITE_FILTER */
 
 #ifdef PNG_WRITE_FILTER_SUPPORTED
       /* If we have allocated the row_buf, this means we have already started
