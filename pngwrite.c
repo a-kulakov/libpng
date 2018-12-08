@@ -1125,9 +1125,10 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
                png_ptr->tst_row = png_voidcast(png_bytep,
                    png_malloc(png_ptr, buf_size));
          }
+
+         png_ptr->do_filter = (png_byte)filters;
       }
-      png_ptr->do_filter = (png_byte)filters;
-#endif
+#endif /* WRITE_FILTER */
    }
    else
       png_error(png_ptr, "Unknown custom filter method");
