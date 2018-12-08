@@ -1012,18 +1012,15 @@ png_set_filter(png_structrp png_ptr, int method, int filters)
    if ((png_ptr->mng_features_permitted & PNG_FLAG_MNG_FILTER_64) != 0 &&
        (method == PNG_INTRAPIXEL_DIFFERENCING))
       method = PNG_FILTER_TYPE_BASE;
-
 #endif
+
    if (method == PNG_FILTER_TYPE_BASE)
    {
 #ifndef PNG_WRITE_FILTER_SUPPORTED
-      switch (filters & (PNG_ALL_FILTERS | 0x07))
+      png_ptr->do_filter = PNG_FILTER_NONE;
+      if (filters != PNG_FILTER_VALUE_NONE)
       {
-         case PNG_FILTER_VALUE_NONE:
-            png_ptr->do_filter = PNG_FILTER_NONE; break;
-
-         default:
-            png_app_error(png_ptr, "Unknown row filter for method 0");
+         png_app_error(png_ptr, "Unknown row filter for method 0");
       }
 #endif /* ! WRITE_FILTER */
 
